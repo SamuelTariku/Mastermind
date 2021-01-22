@@ -1,0 +1,7 @@
+
+Feature list (todo list)
+
+#TODO Priority System for todohandler
+#TODO Task grouping
+#TODO DoHandler + tracking
+#TODO Assigning points for todohandler
