@@ -1,9 +1,9 @@
-##Todo CLI Python
+## Todo CLI Python
 
-##Overview
+## Overview
 Small command-line todo-list for keeping track of tasks
 
-##Commands
+## Commands
 
 $>help more
 
