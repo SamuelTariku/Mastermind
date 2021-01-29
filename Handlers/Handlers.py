@@ -276,7 +276,7 @@ class InputHandler(Handler):
                     newlineParameters = newlineParameters.strip()
                     inputList += newlineParameters
 
-        return inputList
+        return " ".join(inputList)
 
     def printHelp(self, helpCommand):
         # Prints help for deeper functions if there is a input error

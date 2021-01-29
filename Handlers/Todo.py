@@ -449,9 +449,11 @@ class TodoHandler(Handler):
                         taskName=parameter.getValue()))
                     return
 
-                print()
-                for task in taskList:
-                    print(task)
+                if(len(taskList) == 0):
+                    print("\n There are no tasks that fit that parameter \n")
+                    return
+
+                self.printList(taskList)
 
                 print("\n Are you sure you want to delete? \n")
 
@@ -470,9 +472,10 @@ class TodoHandler(Handler):
                         taskName=parameter.getValue()))
                     return
 
-                print()
-                for task in taskList:
-                    print(task)
+                if(len(taskList) == 0):
+                    print("\n There are no tasks that fit that parameter \n")
+                    return
+                self.printList(taskList)
 
                 print("\n Are you sure you want to delete? \n")
 
