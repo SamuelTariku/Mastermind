@@ -10,6 +10,13 @@ class TodoHandler(Handler):
     def __init__(self, db):
         self.commands = {
             "default": None,
+
+            "help": {
+                "default": "Create a todo list",
+                "more": self.help,
+                "help": "to see more detailed help type: todo help more"
+            },
+
             "create": {
                 "default": None,
                 "help": "Create a todo list",
@@ -49,15 +56,14 @@ class TodoHandler(Handler):
                 "task": self.commandModifyTask
             },
 
-            "help": {
-                "default": "Create a todo list",
-                "more": self.help,
-                "help": "to see more detailed help type: todo help more"
+            "group": {
+                "default": None,
+                "help": None
             }
         }
-        todoDatabase = db.getName()
-        todoTable = db.getTable("todo")
-        self.database = TodoData(todoDatabase, todoTable)
+
+        self.database = db
+        self.database['todo'] = TodoData
 
     def searchParameterList(self, name, parameterList):
         for parameter in parameterList:
@@ -290,7 +296,7 @@ class TodoHandler(Handler):
         if (builtTask == None):
             print("\n ...Task not created... \n")
             return
-        self.database.insertData(builtTask)
+        self.database['todo'].insertData(builtTask)
 
     # ------- Task modification for existing tasks ---
     def commandModifyTask(self, extra=None):
@@ -392,7 +398,10 @@ class TodoHandler(Handler):
             print("\n ...Task is not modified... \n")
             return
 
-        self.database.updateByID(builtModTask.getTaskID(), builtModTask)
+        self.database['todo'].updateByID(
+            builtModTask.getTaskID(), builtModTask)
+
+    # TODO todo modify many
 
     # -------- Deleting tasks from database -----
     # delete all tasks
@@ -404,7 +413,7 @@ class TodoHandler(Handler):
             todo clear all
 
         """
-        self.database.clearAllTasks()
+        self.database['todo'].clearAllTasks()
 
     # delete one task by parameter
     def commandClear(self, extra):
@@ -442,7 +451,8 @@ class TodoHandler(Handler):
         for parameter in parsedParameters:
             if(parameter.getName() == 'tID'):
                 # ASSURANCE
-                taskList = self.database.getTaskByID(parameter.getValue())
+                taskList = self.database['todo'].getTaskByID(
+                    parameter.getValue())
 
                 if(taskList == None):
                     print("\n !!! Cannot find task {taskName} !!! \n".format(
@@ -460,12 +470,12 @@ class TodoHandler(Handler):
                 answer = input("(y,n)>")
 
                 if(answer in ('y', 'yes', 'ok')):
-                    self.database.clearTaskByID(parameter.getValue())
+                    self.database['todo'].clearTaskByID(parameter.getValue())
 
             elif(parameter.getName() == 'tName'):
 
                 # ASSURANCE
-                taskList = self.database.getTasksNameFiltered(
+                taskList = self.database['todo'].getTasksNameFiltered(
                     parameter.getValue())
                 if(taskList == None):
                     print("\n !!! Cannot find task {taskName} !!! \n".format(
@@ -482,7 +492,7 @@ class TodoHandler(Handler):
                 answer = input("(y,n)>")
 
                 if(answer in ('y', 'yes', 'ok')):
-                    self.database.clearTaskByName(parameter.getValue())
+                    self.database['todo'].clearTaskByName(parameter.getValue())
 
             else:
                 print("\n !!! ERROR PARSED PARAMETERS - {parameterName}!!!".format(
@@ -499,7 +509,7 @@ class TodoHandler(Handler):
 
         """
 
-        allTasks = self.database.getAllTasks()
+        allTasks = self.database['todo'].getAllTasks()
 
         if(len(allTasks) == 0):
             print("\n ... Todo list empty ... \n")
@@ -528,7 +538,7 @@ class TodoHandler(Handler):
         if(len(extra) == 0):
             # Defaulat sorted by priority
             # TODO optimize sorting system
-            sortedTasks = self.database.getTasksPrioritySorted("asc")
+            sortedTasks = self.database['todo'].getTasksPrioritySorted("asc")
         elif(len(extra) > 1):
 
             if(not (extra[1] == "asc" or extra[1] == "desc")):
@@ -536,17 +546,19 @@ class TodoHandler(Handler):
                 return
 
             if(extra[0] == '-p'):
-                sortedTasks = self.database.getTasksPrioritySorted(extra[1])
+                sortedTasks = self.database['todo'].getTasksPrioritySorted(
+                    extra[1])
             elif(extra[0] == '-n'):
-                sortedTasks = self.database.getTasksNameSorted(extra[1])
+                sortedTasks = self.database['todo'].getTasksNameSorted(
+                    extra[1])
             else:
                 print("!!! Unknown Command !!!")
                 return
         else:
             if(extra[0] == '-p'):
-                sortedTasks = self.database.getTasksPrioritySorted()
+                sortedTasks = self.database['todo'].getTasksPrioritySorted()
             elif(extra[0] == '-n'):
-                sortedTasks = self.database.getTasksNameSorted()
+                sortedTasks = self.database['todo'].getTasksNameSorted()
             else:
                 print("!!! Unknown Command !!!")
                 return
@@ -613,19 +625,19 @@ class TodoHandler(Handler):
         # Get values
         for parameter in parsedParameters:
             if (parameter.getName() == "tName"):
-                filteredTasks = self.database.getTasksNameFiltered(
+                filteredTasks = self.database['todo'].getTasksNameFiltered(
                     parameter.getValue())
             elif (parameter.getName() == "tType"):
-                filteredTasks = self.database.getTasksTypeFiltered(
+                filteredTasks = self.database['todo'].getTasksTypeFiltered(
                     parameter.getValue())
             elif (parameter.getName() == "tRepeat"):
-                filteredTasks = self.database.getTasksRepeatFiltered(
+                filteredTasks = self.database['todo'].getTasksRepeatFiltered(
                     parameter.getName())
             elif (parameter.getName() == "tPriority"):
-                filteredTasks = self.database.getTasksPriorityFiltered(
+                filteredTasks = self.database['todo'].getTasksPriorityFiltered(
                     parameter.getValue())
             elif (parameter.getName() == "tID"):
-                filteredTasks = self.database.getTaskByID(
+                filteredTasks = self.database['todo'].getTaskByID(
                     parameter.getValue())
             else:
                 print("\n ... Parameter setup incorrect ... \n")

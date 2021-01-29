@@ -24,6 +24,9 @@ if (__name__ == '__main__'):
     todoDatabase.addTable(indexName="todo",
                           tableName="todo")
 
+    todoDatabase.addTable(indexName="group",
+                          tableName="group")
+
     # Handler functions
     todoHandler = TodoHandler(todoDatabase)
 

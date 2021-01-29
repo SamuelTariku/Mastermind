@@ -6,41 +6,17 @@ import sqlite3
 
 class TodoData(DAL):
 
-    def __init__(self, database, table):
-        super().__init__(database, table)
+    def __init__(self, db):
+        super().__init__(db)
+
+        self.conn = db.getConn()
 
         # check if table exists
-        isDatabase = self.runDatabaseTest()
+        self.checkTodoTable(db)
+        self.table = db.getTable("todo")
 
-        isTable = True
-
-        if(isDatabase):
-            print("\n ... connected to database {databaseName} ... \n".format(
-                databaseName=self.database.split("\\")[-1]))
-            isTable = self.runTableTest()
-        else:
-            # sqlite creates database if it cants find a database
-            return
-
-        if(not isTable):
-            createStatement = """
-                CREATE TABLE Todo (
-	            "ID"	INTEGER NOT NULL UNIQUE,
-	            "Name"	TEXT NOT NULL,
-	            "Type"	TEXT NOT NULL,
-	            "Repeat"	INTEGER NOT NULL,
-	            "Priority"	TEXT,
-	            PRIMARY KEY("ID" AUTOINCREMENT)
-                )
-            """
-            try:
-                print("\n ...Creating Table... \n")
-                self.conn.execute(createStatement)
-            except Exception as e:
-                print("ERROR cannot create table")
-                print(e)
-            print("\n  TABLE CREATED \n")
-
+        # ------- Configuration Settings ---------------
+        # ID fields
         self.taskIDField = Task.getConfigID('field')
 
         # Required fields
@@ -61,6 +37,30 @@ class TodoData(DAL):
 
         self.todoTableFields = ['id'] + \
             self.requiredFields + self.optionalFields
+        # ------------------------------------------------
+
+    def checkTodoTable(self, db):
+        isTable = db.isTable("todo")
+        if(not isTable):
+            createStatement = """
+                CREATE TABLE Todo (
+	            "ID"	INTEGER NOT NULL UNIQUE,
+	            "Name"	TEXT NOT NULL,
+	            "Type"	TEXT NOT NULL,
+	            "Repeat"	INTEGER NOT NULL,
+	            "Priority"	TEXT,
+	            PRIMARY KEY("ID" AUTOINCREMENT)
+                )
+            """
+            try:
+                print("\n ...Creating Table... \n")
+                self.conn.execute(createStatement)
+            except Exception as e:
+                print("ERROR cannot create table")
+                print(e)
+            print("\n  TABLE CREATED \n")
+            db.addTable("todo", "todo")
+
     # ------ Create ---------
     # Enter data into database
 
@@ -120,7 +120,6 @@ class TodoData(DAL):
     def getAllTasks(self):
 
         tasks = []
-
         statement = "select {fields} from {tableName} limit 0, 1000".format(
             fields=",".join(self.todoTableFields), tableName=self.table)
 
