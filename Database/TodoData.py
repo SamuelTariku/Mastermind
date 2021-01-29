@@ -16,12 +16,11 @@ class TodoData(DAL):
 
         if(isDatabase):
             print("\n ... connected to database {databaseName} ... \n".format(
-                databaseName=self.database))
+                databaseName=self.database.split("\\")[-1]))
             isTable = self.runTableTest()
-
-        if(not isDatabase):
+        else:
             # sqlite creates database if it cants find a database
-            pass
+            return
 
         if(not isTable):
             createStatement = """
@@ -115,8 +114,8 @@ class TodoData(DAL):
 
         print("\n ...Task added to database... \n")
 
-    # -------- Read ----------
-    # Get 1000 lines of records from database
+    # ------------- Read ------------------
+    # Get all tasks
 
     def getAllTasks(self):
 
@@ -143,6 +142,7 @@ class TodoData(DAL):
 
         return tasks
 
+    # Get tasks by parameter
     def getTaskByID(self, id):
         tasks = []
 
@@ -171,59 +171,56 @@ class TodoData(DAL):
 
         return tasks
 
-    def getTasksPrioritySorted(self):
-
-        tasks = self.getAllTasks()
-        iu = []
-        inu = []
-        niu = []
-        ninu = []
-        notSorted = []
-
-        sortedTasks = []
-
-        for task in tasks:
-            if(task.getPriority() == 'iu'):
-                iu.append(task)
-
-            elif(task.getPriority() == 'inu'):
-                inu.append(task)
-
-            elif(task.getPriority() == 'niu'):
-                niu.append(task)
-
-            elif(task.getPriority() == 'ninu'):
-                ninu.append(task)
-
-            elif(task.getPriority() == None):
-                notSorted.append(task)
-
-        sortedTasks = iu + inu + niu + ninu + notSorted
-
-        return sortedTasks
-
-    def getTasksNameSorted(self):
-        # TODO name sorting
-
-        pass
-
     def getTasksPriorityFiltered(self, filter):
 
-        # TODO build using sqlite Like operator
+        tasks = []
+        statement = "select {fields} from {tableName}".format(
+            fields=",".join(self.todoTableFields), tableName=self.table)
 
-        tasks = self.getAllTasks()
-        filteredTask = []
+        condition = "where {priorityField} = {priorityValue}"
 
-        if(filter == None):
-            print("!!! No filter added !!!")
-            # Exception
+        if(filter == 'iu'):
+            condition = condition.format(
+                priorityField='priority',
+                priorityValue=sqliteFormat('iu')
+            )
+        elif(filter == 'inu'):
+            condition = condition.format(
+                priorityField='priority',
+                priorityValue=sqliteFormat('inu')
+            )
+        elif(filter == 'niu'):
+            condition = condition.format(
+                priorityField='priority',
+                priorityValue=sqliteFormat('niu')
+            )
+        elif(filter == 'ninu'):
+            condition = condition.format(
+                priorityField='priority',
+                priorityValue=sqliteFormat('ninu')
+            )
+        else:
+            print("\n ... Type not supported ... \n")
             return
 
-        for task in tasks:
-            if(task.getPriority() == filter):
-                filteredTask.append(task)
+        try:
+            cursor = self.conn.execute("{statement} {condition}".format(
+                statement=statement, condition=condition))
+        except Exception as e:
+            print("/n ... Cannot retrieve tasks ... /n")
+            print(e)
+            return
+        for row in cursor:
+            task = TaskBuilder.build(
+                taskID=row[self.todoTableFields.index("id")],
+                taskName=row[self.todoTableFields.index("name")],
+                taskType=row[self.todoTableFields.index("type")],
+                taskRepeat=row[self.todoTableFields.index("repeat")],
+                taskPriority=row[self.todoTableFields.index("priority")]
+            )
+            tasks.append(task)
 
-        return filteredTask
+        return tasks
 
     def getTasksNameFiltered(self, filter):
 
@@ -304,7 +301,7 @@ class TodoData(DAL):
                 typeField='type', type=sqliteFormat(True))
         elif(filter == False):
             condition = "where {typeField} {typeValue}".format(
-                typeField='type', type=sqliteContainsFormat(False))
+                typeField='type', type=sqliteFormat(False))
         else:
             print("\n ... Type not supported ... \n")
             return
@@ -326,7 +323,83 @@ class TodoData(DAL):
             )
             tasks.append(task)
 
-    # --------- Update ---------
+    # Get tasks sorted by parameter
+    def getTasksPrioritySorted(self, direction="asc"):
+        # FIXME
+        tasks = self.getAllTasks()
+        iu = []
+        inu = []
+        niu = []
+        ninu = []
+        notSorted = []
+
+        sortedTasks = []
+
+        for task in tasks:
+            if(task.getPriority() == 'iu'):
+                iu.append(task)
+
+            elif(task.getPriority() == 'inu'):
+                inu.append(task)
+
+            elif(task.getPriority() == 'niu'):
+                niu.append(task)
+
+            elif(task.getPriority() == 'ninu'):
+                ninu.append(task)
+
+            elif(task.getPriority() == None):
+                notSorted.append(task)
+
+        if(direction == "asc"):
+            sortedTasks = iu + inu + niu + ninu + notSorted
+        elif(direction == "desc"):
+            sortedTasks = ninu + niu + inu + iu + notSorted
+        else:
+            print(direction, "unknown")
+
+        return sortedTasks
+
+    def getTasksNameSorted(self, direction="asc"):
+        tasks = []
+        orderDirection = None
+
+        if(not (direction == "asc" or direction == "desc")):
+            print(direction, "Not Supported")
+
+        statement = "select {fields} from {tableName}".format(
+            fields=",".join(self.todoTableFields),
+            tableName=self.table)
+
+        condition = "order by {orderField} {direction}".format(
+            orderField="name",
+            direction=direction)
+
+        print(statement)
+        try:
+            cursor = self.conn.execute(
+                "{statement} {condition}  limit 0, 1000".format(
+                    statement=statement,
+                    condition=condition)
+            )
+        except Exception as e:
+            print("/n ... Cannot retrieve tasks ... /n")
+            print(e)
+            return
+
+        for row in cursor:
+            task = TaskBuilder.build(
+                taskID=row[self.todoTableFields.index("id")],
+                taskName=row[self.todoTableFields.index("name")],
+                taskType=row[self.todoTableFields.index("type")],
+                taskRepeat=row[self.todoTableFields.index("repeat")],
+                taskPriority=row[self.todoTableFields.index("priority")]
+            )
+            tasks.append(task)
+
+        return tasks
+
+    # --------------- Update -------------
     # update a task by finding id
 
     def updateByID(self, taskID, task):
@@ -377,7 +450,7 @@ class TodoData(DAL):
 
         print("\n ... Task has been updated ... \n")
 
-    # ------- Delete --------
+    # ------------ Delete -----------
     # Clears all tasks in database
     def clearAllTasks(self):
 
@@ -427,32 +500,6 @@ class TodoData(DAL):
             return
 
         print("\n ... Task is deleted ... \n")
-
-    # ------- Connection Tests -----
-
-    def runDatabaseTest(self):
-        try:
-            self.conn = sqlite3.connect(self.database)
-        except sqlite3.OperationalError:
-            print("DATABASE CONNECTION FAILED cannot find {databaseName}".format(
-                databaseName=self.database))
-            return False
-        return True
-
-    def runTableTest(self):
-        try:
-            self.conn.execute(
-                "select * from {tableName}".format(tableName=self.table))
-        except sqlite3.OperationalError:
-            print("Cannot find table {tableName} in {databaseName}".format(
-                tableName=self.table, databaseName=self.database))
-            return False
-        return True
-
-    # close the database
-
-    def closeDatabase(self):
-        self.conn.close()
 
 
 def getAttributeByString(atclass, atobj, string):

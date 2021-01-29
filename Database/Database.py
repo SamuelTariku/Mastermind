@@ -22,20 +22,20 @@ CREATE TABLE Todo (
 conn.execute(
     """
     insert into todo (name, type, repeat)
-    values ('work on database', 'normal', 0);
+    values ('database', 'normal', 0);
     """
 )
 conn.execute(
     """
     insert into todo (name, type, repeat)
-    values ('work on website', 'normal', 0);
+    values ('website', 'normal', 0);
     """
 )
 
 conn.execute(
     """
     insert into todo (name, type, repeat)
-    values ('work another website', 'normal', 0);
+    values ('another website', 'normal', 0);
     """
 )
 
@@ -58,24 +58,29 @@ conn.execute(
 
 conn.execute(
     """
-    delete from todo where {idField}={idValue}
+    delete from todo where {idField}={idValue};
     """.format(idField="id", idValue=2)
 )
 
-conn.execute(
-    """
-    delete from todo where {nameField} like {nameValue}
-    """.format(nameField="name", nameValue="'%work%'")
-)
-cursor = conn.execute("select id, name, type, repeat from todo")
+
+# cursor = conn.execute("select id, name, type, repeat from todo;")
+# for row in cursor:
+#     print("ID: {id} | Name: {name} | Type: {type}| Repeat: {repeat}".format(
+#         id=row[0], name=row[1], type=row[2], repeat=row[3]
+#     ))
+
+print()
+cursor = conn.execute(
+    "select id, name, type, repeat from todo where name LIKE '%database%';")
 for row in cursor:
     print("ID: {id} | Name: {name} | Type: {type}| Repeat: {repeat}".format(
         id=row[0], name=row[1], type=row[2], repeat=row[3]
     ))
 
-print()
+
 cursor = conn.execute(
-    "select id, name, type, repeat from todo where name LIKE '%database%'")
+    "select id, name, type, repeat from todo order by name asc;")
+
 for row in cursor:
     print("ID: {id} | Name: {name} | Type: {type}| Repeat: {repeat}".format(
         id=row[0], name=row[1], type=row[2], repeat=row[3]

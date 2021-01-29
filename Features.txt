@@ -1,7 +1,8 @@
 
 Feature list (todo list)
 
-#TODO Priority System for todohandler
+#TODO Optimize TodoDAl by optimizing DAL, abstraction
 #TODO Task grouping
 #TODO DoHandler + tracking
 #TODO Assigning points for todohandler
+#TODO Pick random task assigned probablity by priority

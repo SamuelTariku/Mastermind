@@ -159,7 +159,45 @@ class TodoHandler(Handler):
 
         print(tableView)
 
+    @staticmethod
+    def taskTypeValidation(value):
+        normalTasks = ['normal', 'n']
+        generalTasks = ['general', 'g']
+        typeValue = None
+        if(value.lower() in normalTasks):
+            typeValue = 'normal'
+        elif(value.lower() in generalTasks):
+            typeValue = 'general'
+        else:
+            print("!!! {} is not a valid task type".format(value))
+        return typeValue
+
+    @staticmethod
+    def taskPriorityValidation(value):
+        # priority matrices
+        ImportantUrgent = ['iu', 'ui', 'important urgent',
+                           'urgent important', 'quick-wins', 'do first']
+        ImporantNotUrgent = ['inu', 'nui', 'important not urgent',
+                             'not urgent important', 'major-work', 'schedule']
+        NotImportantUrgent = ['niu', 'uni', 'not important urgent',
+                              'urgent not important', 'thankless', 'delegate']
+        NotImportantNotUrgent = [
+            'ninu', 'nuni', 'not important not urgent', 'not urgent not important', 'fill-ins', 'aviod']
+        priorityValue = None
+        if(value.lower() in ImportantUrgent):
+            priorityValue = 'iu'
+        elif(value.lower() in ImporantNotUrgent):
+            priorityValue = 'inu'
+        elif(value.lower() in NotImportantUrgent):
+            priorityValue = 'niu'
+        elif(value.lower() in NotImportantNotUrgent):
+            priorityValue = 'ninu'
+        else:
+            print("!!! {} is not a valid task priority !!!".format(value))
+        return priorityValue
+
     # --------- Insert task into data -------
+
     def commandNewTask(self, extra=None):
         # DOCSTRING FOR HELP
         """
@@ -199,7 +237,6 @@ class TodoHandler(Handler):
         # Merge extra together
         extraMerge = " ".join(extra)
 
-        # TODO optimize parameters for handling changes
         # list of input parameters
         parameters = [
             Parameter(parameterName="tName", singleDash="n",
@@ -218,46 +255,13 @@ class TodoHandler(Handler):
         # ------  Custom Validation Functions ---------
         # Task Type Validation
 
-        def taskTypeValidation(value):
-            normalTasks = ['normal', 'n']
-            generalTasks = ['general', 'g']
-            typeValue = None
-            if(value.lower() in normalTasks):
-                typeValue = 'normal'
-            elif(value.lower() in generalTasks):
-                typeValue = 'general'
-            else:
-                print("!!! {} is not a valid task type".format(value))
-            return typeValue
         self.searchParameterList("tType", parameters).setCustomValidation(
-            taskTypeValidation
+            TodoHandler.taskTypeValidation
         )
         # Task Priority Validation
 
-        def taskPriorityValidation(value):
-            # priority matrices
-            ImportantUrgent = ['iu', 'ui', 'important urgent',
-                               'urgent important', 'quick-wins', 'do first']
-            ImporantNotUrgent = ['inu', 'nui', 'important not urgent',
-                                 'not urgent important', 'major-work', 'schedule']
-            NotImportantUrgent = ['niu', 'uni', 'not important urgent',
-                                  'urgent not important', 'thankless', 'delegate']
-            NotImportantNotUrgent = [
-                'ninu', 'nuni', 'not important not urgent', 'not urgent not important', 'fill-ins', 'aviod']
-            priorityValue = None
-            if(value.lower() in ImportantUrgent):
-                priorityValue = 'iu'
-            elif(value.lower() in ImporantNotUrgent):
-                priorityValue = 'inu'
-            elif(value.lower() in NotImportantUrgent):
-                priorityValue = 'niu'
-            elif(value.lower() in NotImportantNotUrgent):
-                priorityValue = 'ninu'
-            else:
-                print("!!! {} is not a valid task priority !!!".format(value))
-            return priorityValue
         self.searchParameterList("tPriority", parameters).setCustomValidation(
-            taskPriorityValidation
+            TodoHandler.taskPriorityValidation
         )
         # ------------------------------------------------
 
@@ -266,7 +270,8 @@ class TodoHandler(Handler):
             parsedParameters = []
         else:
             # Handle multi line input
-            InputHandler.multilineInput(extraMerge, "todo newtask")
+            extraMerge = InputHandler.multilineInput(
+                extraMerge, "todo newtask")
 
             # parse the arguments for the parameters
             parsedParameters = parameterParse(extraMerge, parameters)
@@ -328,7 +333,6 @@ class TodoHandler(Handler):
         # Merge extra together
         extraMerge = " ".join(extra)
 
-        # TODO optimize parameters for handling changes
         parameters = [
             Parameter(parameterName="tID", singleDash="i",
                       doubleDash="id", isRequired=True,
@@ -350,48 +354,15 @@ class TodoHandler(Handler):
 
         # ------  Custom Validation Functions ---------
         # Task Type Validation
-        def taskTypeValidation(value):
-            normalTasks = ['normal', 'n']
-            generalTasks = ['general', 'g']
-            typeValue = None
-            if(value.lower() in normalTasks):
-                typeValue = 'normal'
-            elif(value.lower() in generalTasks):
-                typeValue = 'general'
-            else:
-                print("!!! {} is not a valid task type".format(value))
-            return typeValue
+
         self.searchParameterList("tType", parameters).setCustomValidation(
-            taskTypeValidation
+            TodoHandler.taskTypeValidation
         )
-
         # Task Priority Validation
-        def taskPriorityValidation(value):
-            # priority matrices
-            ImportantUrgent = ['iu', 'ui', 'important urgent',
-                               'urgent important', 'quick-wins', 'do first']
-            ImporantNotUrgent = ['inu', 'nui', 'important not urgent',
-                                 'not urgent important', 'major-work', 'schedule']
-            NotImportantUrgent = ['niu', 'uni', 'not important urgent',
-                                  'urgent not important', 'thankless', 'delegate']
-            NotImportantNotUrgent = [
-                'ninu', 'nuni', 'not important not urgent', 'not urgent not important', 'fill-ins', 'aviod']
-            priorityValue = None
-            if(value.lower() in ImportantUrgent):
-                priorityValue = 'iu'
-            elif(value.lower() in ImporantNotUrgent):
-                priorityValue = 'inu'
-            elif(value.lower() in NotImportantUrgent):
-                priorityValue = 'niu'
-            elif(value.lower() in NotImportantNotUrgent):
-                priorityValue = 'ninu'
-            else:
-                print("!!! {} is not a valid task priority !!!".format(value))
-            return priorityValue
-        self.searchParameterList("tPriority", parameters).setCustomValidation(
-            taskPriorityValidation
-        )
 
+        self.searchParameterList("tPriority", parameters).setCustomValidation(
+            TodoHandler.taskPriorityValidation
+        )
         # ------------------------------------------------
 
         # if there are no inputs
@@ -400,7 +371,8 @@ class TodoHandler(Handler):
             return
         else:
             # Handle multi line input
-            InputHandler.multilineInput(extraMerge, "todo newtask")
+            extraMerge = InputHandler.multilineInput(
+                extraMerge, "todo modtask")
 
             # parse the arguments for the parameters
             parsedParameters = parameterParse(extraMerge, parameters)
@@ -458,7 +430,8 @@ class TodoHandler(Handler):
         ]
 
         # Handle multi line input
-        InputHandler.multilineInput(extraMerge, "todo newtask")
+        extraMerge = InputHandler.multilineInput(
+            extraMerge, "todo delete task")
 
         # parse the arguments for the parameters
         parsedParameters = parameterParse(extraMerge, parameters)
@@ -531,27 +504,41 @@ class TodoHandler(Handler):
 
         self.printList(allTasks)
 
-    # TODO sorting and filtering based on priority
-
     def commandShowSort(self, extra=None):
-        # TODO sorting assending and dissending
         """
         Shows sorted database
 
         Usage: todo show sort [PARAMETER]
 
-        e.g - todo show sort -p
+        e.g - todo show sort -p |asc/desc|
 
         Parameters:
             -p  -------- sort by parameter
             -n --------- sort by name
+
+            OPTIONAL
+            asc/desc ------ asc or desc
+
 
         """
         sortedTasks = []
         if(len(extra) == 0):
             # Defaulat sorted by priority
             # TODO optimize sorting system
-            sortedTasks = self.database.getTasksPrioritySorted()
+            sortedTasks = self.database.getTasksPrioritySorted("asc")
+        elif(len(extra) > 1):
+
+            if(not (extra[1] == "asc" or extra[1] == "desc")):
+                print(extra[1], "unknown")
+                return
+
+            if(extra[0] == '-p'):
+                sortedTasks = self.database.getTasksPrioritySorted(extra[1])
+            elif(extra[0] == '-n'):
+                sortedTasks = self.database.getTasksNameSorted(extra[1])
+            else:
+                print("!!! Unknown Command !!!")
+                return
         else:
             if(extra[0] == '-p'):
                 sortedTasks = self.database.getTasksPrioritySorted()
@@ -598,51 +585,19 @@ class TodoHandler(Handler):
 
         # ------  Custom Validation Functions ---------
         # Task Type Validation
-        def taskTypeValidation(value):
-            normalTasks = ['normal', 'n']
-            generalTasks = ['general', 'g']
-            typeValue = None
-            if(value.lower() in normalTasks):
-                typeValue = 'normal'
-            elif(value.lower() in generalTasks):
-                typeValue = 'general'
-            else:
-                print("!!! {} is not a valid task type".format(value))
-            return typeValue
+
         self.searchParameterList("tType", parameters).setCustomValidation(
-            taskTypeValidation
+            TodoHandler.taskTypeValidation
         )
         # Task Priority Validation
 
-        def taskPriorityValidation(value):
-            # priority matrices
-            ImportantUrgent = ['iu', 'ui', 'important urgent',
-                               'urgent important', 'quick-wins', 'do first']
-            ImporantNotUrgent = ['inu', 'nui', 'important not urgent',
-                                 'not urgent important', 'major-work', 'schedule']
-            NotImportantUrgent = ['niu', 'uni', 'not important urgent',
-                                  'urgent not important', 'thankless', 'delegate']
-            NotImportantNotUrgent = [
-                'ninu', 'nuni', 'not important not urgent', 'not urgent not important', 'fill-ins', 'aviod']
-            priorityValue = None
-            if(value.lower() in ImportantUrgent):
-                priorityValue = 'iu'
-            elif(value.lower() in ImporantNotUrgent):
-                priorityValue = 'inu'
-            elif(value.lower() in NotImportantUrgent):
-                priorityValue = 'niu'
-            elif(value.lower() in NotImportantNotUrgent):
-                priorityValue = 'ninu'
-            else:
-                print("!!! {} is not a valid task priority !!!".format(value))
-            return priorityValue
         self.searchParameterList("tPriority", parameters).setCustomValidation(
-            taskPriorityValidation
+            TodoHandler.taskPriorityValidation
         )
         # ------------------------------------------------
 
         # Handle multi line input
-        InputHandler.multilineInput(extraMerge, "todo newtask")
+        extraMerge = InputHandler.multilineInput(extraMerge, "todo show task")
 
         # parse the arguments for the parameters
         parsedParameters = parameterParse(extraMerge, parameters)
@@ -674,7 +629,7 @@ class TodoHandler(Handler):
                 return
 
         if(filteredTasks == None):
-            # Custom Exception
+            # TODO Custom Exception
             return
 
         if(len(filteredTasks) == 0):
