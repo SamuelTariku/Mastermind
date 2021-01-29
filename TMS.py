@@ -2,11 +2,21 @@ from Handlers.Handlers import *
 from Handlers.Todo import *
 from Database.DAL import Database
 
+import os
+
 # Handle the inputs
 if (__name__ == '__main__'):
     # Config DB
     # database and/or database list
-    todoDatabase = Database("Todo")
+
+    databaseName = "Todo.db"
+    
+    #
+    path = os.path.dirname(os.path.abspath(__file__))
+    db = os.path.join(path, databaseName)
+    # exit()
+
+    todoDatabase = Database(db)
 
     # TODO figure out how to add indexed assignement like dictionary(hashmaps)
     # I.E todoDatabase[todo] = todo
@@ -27,6 +37,5 @@ if (__name__ == '__main__'):
 
     # close database
     todoHandler.database.closeDatabase()
-    print()
-    print("Press any key to continue")
-    input()
+
+    print(" \n Press any key to continue \n")
